@@ -11,7 +11,7 @@ namespace Entities.Concrete
 {
    public class Product : BaseEntity
     {
-     
+        public string Description { get; set; }
         public int BuyPrice { get; set; }
         public bool IsOfferable { get; set; } = false;
         public bool IsSold { get; set; } = false;
