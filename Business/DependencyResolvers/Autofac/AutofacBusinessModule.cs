@@ -43,6 +43,8 @@ namespace Business.DependencyResolvers.Autofac
             builder.RegisterType<OfferManager>().As<IOfferService>().SingleInstance();
             builder.RegisterType<EfOfferDal>().As<IOfferDal>().SingleInstance();
 
+            builder.RegisterType<EmailManager>().As<IEmailService>().SingleInstance();
+
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 
             builder.RegisterAssemblyTypes(assembly).AsImplementedInterfaces()
