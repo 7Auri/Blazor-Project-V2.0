@@ -1,9 +1,13 @@
 using Core.DependencyResolvers;
+using Core.Entities.Concrete;
 using Core.Extensions;
 using Core.Utilities.IoC;
 using Core.Utilities.Security.Encryption;
 using Core.Utilities.Security.Jwt;
+using DataAccess.Concrete.EntityFramework;
 using Entities.Concrete;
+using Hangfire;
+using Hangfire.SqlServer;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -33,6 +37,22 @@ namespace WebApi
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddHangfire(configuration => configuration
+                   .SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                   .UseSimpleAssemblyNameTypeSerializer()
+                   .UseRecommendedSerializerSettings()
+                   .UseSqlServerStorage(Configuration.GetConnectionString("Default"), new SqlServerStorageOptions
+                   {
+                       CommandBatchMaxTimeout = TimeSpan.FromMinutes(5),
+                       SlidingInvisibilityTimeout = TimeSpan.FromMinutes(5),
+                       QueuePollInterval = TimeSpan.Zero,
+                       UseRecommendedIsolationLevel = true,
+                       DisableGlobalLocks = true
+
+                   }));
+
+            services.AddHangfireServer();
+     
             services.Configure<Email>(Configuration.GetSection("SMTPConfig"));
 
             var tokenOptions = Configuration.GetSection("TokenOptions").Get<TokenOptions>();
@@ -83,6 +103,7 @@ namespace WebApi
             {
                 endpoints.MapControllers();
             });
+            app.UseHangfireDashboard();
         }
     }
 }

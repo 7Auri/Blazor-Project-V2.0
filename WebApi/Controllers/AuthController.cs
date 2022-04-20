@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Entities.Concrete.DTOs;
+using Hangfire;
 
 namespace WebApi.Controllers
 {
@@ -26,15 +27,16 @@ namespace WebApi.Controllers
             var userToLogin = _authService.Login(userForLoginDto);
             if (!userToLogin.Success)
             {
+
                 return BadRequest(userToLogin.Message);
             }
 
             var result = _authService.CreateToken(userToLogin.Data);
             if (result.Success)
             {
+               
                 return Ok(result);
             }
-
             return BadRequest(result);
         }
 
@@ -51,6 +53,7 @@ namespace WebApi.Controllers
             var result = _authService.CreateToken(registerResult.Data);
             if (result.Success)
             {
+                BackgroundJob.Schedule<IEmailService>(x => x.SendEmailAsync(userForRegisterDto.Email, userForRegisterDto.FirstName, "WELCOME TO MY BLAZOR PROJECT =)"), TimeSpan.FromSeconds(2));
                 return Ok(result);
             }
 
