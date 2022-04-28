@@ -1,0 +1,82 @@
+﻿@page "/listDetailproduct"
+@inject NavigationManager NavManager
+@using System.Net.Http.Json
+@inject IHttpClientFactory ClientFactory
+@using Newtonsoft.Json
+
+
+<h3>List Product</h3>
+<a class="btn btn-info" href="/addproduct">Create New</a>
+@if (ProductDetails == null)
+{
+<p>
+    <em>Loading...</em>
+</p> }
+else
+{
+<table class="table">
+    <thead>
+        <tr>
+
+            <th>Name</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Offer?</th>
+            <th>Brand</th>
+            <th>Color</th>
+            <th>Image</th>
+            <th>Category Name</th>
+            <th>Status</th>
+
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var pro in ProductDetails)
+        {
+<tr>
+
+    <td>@pro.ProductName</td>
+    <td>@pro.Description</td>
+    <td>@pro.BuyPrice₺</td>
+    <td>@pro.IsOfferable</td>
+    <td>@pro.BrandName</td>
+    <td>@pro.ColorName</td>
+    <td>@pro.ImagePath</td>
+    <td>@pro.CategoryName</td>
+    <td>@pro.Status</td>
+</tr>
+}
+
+    </tbody>
+</table>}
+@code { public List<ProductDetails> ProductDetails { get; set; }
+
+            HttpClient client = new HttpClient();
+            HttpRequestMessage request;
+            int id = 50;
+
+            protected override async Task OnInitializedAsync()
+            {
+
+                request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:5000/api/Product/details?productId" + id);
+                var response1 = await client.SendAsync(request);
+                if (response1.IsSuccessStatusCode)
+                {
+                    var json = await response1.Content.ReadAsStringAsync();
+
+                    var paginatedResult = JsonConvert.DeserializeObject<PaginatedResult<ProductDetails>>(json);
+                    ProductDetails = paginatedResult.Data;
+
+                }
+
+            } }
+
+
+
+
+
+
+
+
+

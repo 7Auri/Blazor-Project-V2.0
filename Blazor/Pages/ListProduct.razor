@@ -1,0 +1,74 @@
+﻿@page "/listproduct"
+@inject NavigationManager NavManager
+@using System.Net.Http.Json
+@inject IHttpClientFactory ClientFactory
+@using Newtonsoft.Json
+
+
+<h3>List Product</h3>
+<a class="btn btn-info" href="/addproduct">Create New</a>
+@if (Product == null)
+{
+<p>
+    <em>Loading...</em>
+</p> }
+else
+{
+<table class="table">
+    <thead>
+        <tr>
+
+            <th>Name</th>
+            <th>Description</th>
+            <th>Price</th>
+            <th>Offer?</th>
+     
+
+        </tr>
+    </thead>
+    <tbody>
+
+        @foreach (var pro in Product)
+        {
+<tr>
+
+    <td>@pro.Name</td>
+    <td>@pro.Description</td>
+    <td>@pro.BuyPrice₺</td>
+    <td>@pro.IsOfferable</td>
+ 
+</tr>
+}
+
+    </tbody>
+</table>}
+@code { public List<Product> Product { get; set; }
+
+            HttpClient client = new HttpClient();
+            HttpRequestMessage request;
+            int id = 50;
+
+            protected override async Task OnInitializedAsync()
+            {
+
+                request = new HttpRequestMessage(HttpMethod.Get, "http://localhost:5000/api/Product" );
+                var response1 = await client.SendAsync(request);
+                if (response1.IsSuccessStatusCode)
+                {
+                    var json = await response1.Content.ReadAsStringAsync();
+
+                    var paginatedResult = JsonConvert.DeserializeObject<PaginatedResult<Product>>(json);
+                    Product = paginatedResult.Data;
+
+                }
+
+            } }
+
+
+
+
+
+
+
+
+
