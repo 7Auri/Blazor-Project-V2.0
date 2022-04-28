@@ -1,0 +1,14 @@
+﻿@using DataAccess.Concrete.EntityFramework
+<AuthorizeView>
+    <Authorized>
+       
+        Welcome, @dbContext.Users <a href="/Logout">Logout</a>
+    </Authorized>
+    <NotAuthorized>
+        <a href="/Login">Login</a>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private BPDbContext dbContext = new();
+}

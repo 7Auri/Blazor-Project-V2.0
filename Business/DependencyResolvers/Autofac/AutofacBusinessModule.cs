@@ -3,6 +3,7 @@ using Autofac.Extras.DynamicProxy;
 using Business.Abstract;
 using Business.Concrete;
 using Castle.DynamicProxy;
+using Core.Utilities.Helpers.FileHelper;
 using Core.Utilities.Interceptors;
 using Core.Utilities.Security.Jwt;
 using DataAccess.Abstract;
@@ -43,7 +44,12 @@ namespace Business.DependencyResolvers.Autofac
             builder.RegisterType<OfferManager>().As<IOfferService>().SingleInstance();
             builder.RegisterType<EfOfferDal>().As<IOfferDal>().SingleInstance();
 
+            builder.RegisterType<StateManager>().As<IStateService>().SingleInstance();
+            builder.RegisterType<EfStateDal>().As<IStateDal>().SingleInstance();
+
             builder.RegisterType<EmailManager>().As<IEmailService>().SingleInstance();
+
+            builder.RegisterType<FileHelper>().As<IFileHelper>().SingleInstance();
 
             var assembly = System.Reflection.Assembly.GetExecutingAssembly();
 

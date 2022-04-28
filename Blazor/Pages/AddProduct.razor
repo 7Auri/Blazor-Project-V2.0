@@ -1,0 +1,237 @@
+﻿@page "/addproduct"
+@inject IHttpClientFactory ClientFactory
+@using Microsoft.AspNetCore.Components.Server.ProtectedBrowserStorage
+@using System.Net.Http.Json
+@inject IJSRuntime js
+@inject NavigationManager NavigationManager
+@inject ProtectedLocalStorage Storage
+@using Newtonsoft.Json
+@using System.IO
+@using Microsoft.AspNetCore.Http;
+
+
+
+
+<div class="card">
+    <div class="card-body my-2">
+        <h3>Add Product</h3>
+        <hr />
+        <EditForm Model="@product" OnValidSubmit="@Submit">
+            <DataAnnotationsValidator />
+
+            <div class="form-outline mb-4">
+                <label for="ProductId">Product Id</label><br />
+                <InputNumber id="ProductId" @bind-Value="product.Id" class="form-control form-control-md" />
+                <ValidationMessage For="() => product.Id" />
+            </div>
+            <div class="form-outline mb-4">
+                <label for="Brand">Brand</label><br />
+                <InputSelect class="custom-select" @bind-Value="product.BrandId">
+                    <option selected="selected">Please Choose</option>
+                    @foreach (var item in Brands)
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => product.Brand" />
+            </div>
+            <div class="form-outline mb-4">
+                <label for="Name">Name</label><br />
+                <InputText id="Name" @bind-Value="product.Name" class="form-control form-control-md" />
+                <ValidationMessage For="() => product.Name" />
+            </div>
+
+            <div class="form-outline mb-4">
+                <label for="Description">Description</label><br />
+                <InputText id="Description" @bind-Value="product.Description" class="form-control form-control-md" />
+                <ValidationMessage For="() => product.Description" />
+            </div>
+
+            <div class="form-outline mb-4">
+                <label for="Color">Color</label><br />
+                <InputSelect class="custom-select" @bind-Value="product.ColorId">
+                    <option selected="selected">Please Choose</option>
+                    @foreach (var item in Colors)
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => product.Color" />
+            </div>
+
+            <div class="form-outline mb-4">
+                <label for="OriginalPrice">Price</label><br />
+                <InputNumber id="OriginalPrice" @bind-Value="product.BuyPrice" class="form-control form-control-md" />
+                <ValidationMessage For="() => product.BuyPrice" />
+            </div>
+            <div class="form-outline mb-4">
+                <label for="IsOfferable">Is Offerable</label><br />
+                <InputCheckbox id="checkbox" @bind-Value="product.IsOfferable" class="form-control form-control-md" />
+                <ValidationMessage For="() => product.IsOfferable" />
+            </div>
+
+            <div class="form-outline mb-4">
+                <label for="usingStatus">Using Status</label><br />
+                <InputSelect class="custom-select" @bind-Value="product.StateId">
+                    <option selected="selected">Please Choose</option>
+                    @foreach (var item in States)
+                    {
+                        <option value="@item.Id">@item.Status</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => product.StateId" />
+            </div>
+            <div class="form-outline mb-4">
+                <label for="Categories">Categories</label><br />
+                <InputSelect class="custom-select" @bind-Value="product.CategoryId">
+                    <option selected="selected">Please Choose</option>
+
+                    @foreach (var item in Categories)
+                    {
+                        <option value="@item.Id">@item.Name</option>
+                    }
+                </InputSelect>
+                <ValidationMessage For="() => product.CategoryId" />
+            </div>
+
+
+            <div class="form-group row">
+                <label for="price" class="col-sm-2 col-form-label">
+                    Upload
+                </label>
+                <div class="col-sm-10">
+                    <InputFile OnChange="OnInputFileChange" accept=".jpg, .jpeg, png" />
+                </div>
+            </div>
+
+         
+
+                @if (IsSubmit)
+                {
+                    <button class="btn btn-primary btn-block" type="button" disabled>
+                        <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                        <span class="sr-only">Loading...</span>
+                    </button> }
+                else
+                {
+                    <button class="btn btn-primary btn-block">Submit</button>}
+
+        </EditForm>
+    </div>
+</div>
+
+@code {
+    private bool IsSubmit = false;
+    public Product product = new();
+    public List<Brand> Brands = new();
+    public Offer offer = new();
+    public List<Category> Categories = new();
+    public List<Color> Colors = new();
+    public List<State> States = new();
+    public ProductImage image = new();
+    private string _error;
+    public IFormFile selectedImage { get; set; }
+    public ProductImage FileToUpload { get; set; }
+
+    private async void OnInputFileChange(InputFileChangeEventArgs e)
+    {
+        IBrowserFile selectedFile = e.File;
+        Stream stream = selectedFile.OpenReadStream();
+        MemoryStream ms = new MemoryStream();
+        await stream.CopyToAsync(ms);
+        stream.Close();
+
+        FileToUpload = new ProductImage();
+        FileToUpload.Name = selectedFile.Name;
+        FileToUpload.ImageContent = ms.ToArray();
+        ms.Close();
+
+    }
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        _error = "";
+        var client = ClientFactory.CreateClient();
+        var token = await Storage.GetAsync<string>("data");
+
+
+
+        var requestMessage1 = new HttpRequestMessage(HttpMethod.Get, "http://localhost:5000/api/color");
+        var requestMessage2 = new HttpRequestMessage(HttpMethod.Get, "http://localhost:5000/api/brand");
+        var requestMessage3 = new HttpRequestMessage(HttpMethod.Get, "http://localhost:5000/api/category");
+        var requestMessage4 = new HttpRequestMessage(HttpMethod.Get, "http://localhost:5000/api/state");
+        requestMessage2.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.Value);
+        requestMessage3.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.Value);
+        requestMessage1.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.Value);
+        requestMessage4.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token.Value);
+
+        var responseMessage1 = await client.SendAsync(requestMessage1);
+        var responseMessage2 = await client.SendAsync(requestMessage2);
+        var responseMessage3 = await client.SendAsync(requestMessage3);
+        var responseMessage4 = await client.SendAsync(requestMessage4);
+
+        if (responseMessage1.IsSuccessStatusCode)
+        {
+            var json = await responseMessage1.Content.ReadAsStringAsync();
+            var paginatedResult = JsonConvert.DeserializeObject<PaginatedResult<Color>>(json);
+            Colors = paginatedResult.Data;
+        }
+
+
+
+        if (responseMessage2.IsSuccessStatusCode)
+        {
+            var json = await responseMessage2.Content.ReadAsStringAsync();
+            var paginatedResult = JsonConvert.DeserializeObject<PaginatedResult<Brand>>(json);
+            Brands = paginatedResult.Data;
+        }
+
+
+
+        if (responseMessage3.IsSuccessStatusCode)
+        {
+            var json = await responseMessage3.Content.ReadAsStringAsync();
+            var paginatedResult = JsonConvert.DeserializeObject<PaginatedResult<Category>>(json);
+            Categories = paginatedResult.Data;
+        }
+
+        if (responseMessage4.IsSuccessStatusCode)
+        {
+            var json = await responseMessage4.Content.ReadAsStringAsync();
+            var paginatedResult = JsonConvert.DeserializeObject<PaginatedResult<State>>(json);
+            States = paginatedResult.Data;
+        }
+    }
+
+
+    private async Task Submit()
+    {
+        product.ProductImage = FileToUpload;
+
+
+        var client = ClientFactory.CreateClient();
+
+        var responseMessage = await client.PostAsJsonAsync("http://localhost:5000/api/product", product);
+
+
+        if (responseMessage.IsSuccessStatusCode)
+        {
+            string addProduct = await responseMessage.Content.ReadAsStringAsync();
+           
+            await js.InvokeVoidAsync("alert", "Save Successful");
+
+            await Storage.SetAsync("profile", product);
+
+        }
+        else
+        {
+            await js.InvokeVoidAsync("alert", "Save Failed!!");
+        }
+    }
+
+
+
+
+
+}

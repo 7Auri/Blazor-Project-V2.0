@@ -1,5 +1,6 @@
 ﻿using Core.Entities.Concrete;
 using Entities.Concrete;
+using Entities.Concrete.DTOs;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -23,6 +24,9 @@ namespace DataAccess.Concrete.EntityFramework
         public DbSet<OperationClaim> OperationClaims { get; set; }
         public DbSet<UserOperationClaim> UserOperationClaims { get; set; }
         public DbSet<Offer> Offers { get; set; }
-
+        public DbSet<State> States { get; set; }
+        public DbSet<Brand> Brands { get; set; }
+        public DbSet<Color>Colors { get; set; }
+        public DbSet<ProductDetails> ProductDetails { get; set; }
     }
 }

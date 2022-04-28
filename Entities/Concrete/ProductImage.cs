@@ -10,7 +10,9 @@ namespace Entities.Concrete
    public class ProductImage : IEntity
     {
         public int Id { get; set; }
+        public string Name { get; set; }
         public int ProductId { get; set; }
+        public byte[] ImageContent { get; set; }
         public string ImagePath { get; set; }
         public DateTime Date { get; set; }
     }

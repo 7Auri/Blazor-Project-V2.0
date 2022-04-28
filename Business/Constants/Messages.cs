@@ -26,5 +26,7 @@
         public static string ErrorPassword = "Password is wrong";
         public static string ErrorNotUser = "User not found";
         public static string ErrorHaveUser = "User exists";
+
+        public static string ImageLimitForThisProductHasBeenExceeded = "Bu product için daha fazla resim eklenemez";
     }
 }

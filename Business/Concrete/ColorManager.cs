@@ -17,7 +17,7 @@ namespace Business.Concrete
             _colorDal = colorDal;
         }
 
-        /*[ValidationAspect(typeof(ColorValidator))]*/
+
         public IResult Add(Color color)
         {
             _colorDal.Add(color);
@@ -40,7 +40,7 @@ namespace Business.Concrete
             return new SuccessDataResult<Color>(_colorDal.Get(x => x.Id == id), Messages.SuccessListed);
         }
 
-        /*[ValidationAspect(typeof(ColorValidator))]*/
+
         public IResult Update(Color color)
         {
             _colorDal.Update(color);
